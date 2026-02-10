@@ -32,7 +32,6 @@ func main() {
 		log.Fatal("failed to read log:", err)
 	}
 
-	// Print something to demonstrate it's working
 	fmt.Printf("Number of logs parsed: %d\n", len(logs))
 	if len(logs) > 0 {
 		fmt.Println("First line:")
@@ -40,6 +39,11 @@ func main() {
 	}
 }
 
+// logParser parses a single Apache access log line and returns a LogEntry
+// struct with the extracted fields. It uses regex to match the expected
+// log format and converts timestamp, status code, and response size to
+// their appropriate types. Returns an error if the line doesn't match
+// the expected format or if type conversion fails.
 func logParser(l string) (*LogEntry, error) {
 	var entry *LogEntry
 
@@ -82,6 +86,10 @@ func logParser(l string) (*LogEntry, error) {
 	return entry, nil
 }
 
+// logReader reads a log file and parses each line into LogEntry structs.
+// It takes a file path as input and returns a slice of parsed log entries
+// and any error encountered during reading or parsing. Lines that fail to
+// parse are skipped with an error message printed to stdout.
 func logReader(path string) ([]*LogEntry, error) {
 	// Open the file
 	f, err := os.Open(path)
