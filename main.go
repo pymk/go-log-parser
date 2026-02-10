@@ -2,11 +2,13 @@ package main
 
 import (
 	"bufio"
+	"cmp"
 	"fmt"
 	"log"
 	"os"
 	"path/filepath"
 	"regexp"
+	"slices"
 	"strconv"
 	"time"
 )
@@ -24,6 +26,11 @@ type LogEntry struct {
 	UserAgent    string
 }
 
+type StatusCodeCount struct {
+	Code  int
+	Count int
+}
+
 func main() {
 	logPath := filepath.Clean("testdata/access.log")
 
@@ -36,6 +43,12 @@ func main() {
 	if len(logs) > 0 {
 		fmt.Println("First line:")
 		fmt.Println(logs[0])
+		fmt.Println("# Statistics ----------------------------------------")
+		fmt.Println("Status Code Counts:")
+		statusCodeStats := statusCodeCounts(logs)
+		for _, v := range statusCodeStats {
+			fmt.Printf("- %d: %d\n", v.Code, v.Count)
+		}
 	}
 }
 
@@ -118,4 +131,27 @@ func logReader(path string) ([]*LogEntry, error) {
 	}
 
 	return logs, nil
+}
+
+// statusCodeCounts returns a slice of StatusCodeCount struct,
+// sorted by Code values.
+func statusCodeCounts(l []*LogEntry) []StatusCodeCount {
+	m := make(map[int]int)
+	for _, entry := range l {
+		m[entry.StatusCode]++
+	}
+
+	s := []StatusCodeCount{}
+	for k, v := range m {
+		s = append(s, StatusCodeCount{
+			Code:  k,
+			Count: v,
+		})
+	}
+
+	slices.SortFunc(s, func(i, j StatusCodeCount) int {
+		return cmp.Compare(i.Code, j.Code)
+	})
+
+	return s
 }
