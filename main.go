@@ -41,13 +41,11 @@ func main() {
 
 	fmt.Printf("Number of logs parsed: %d\n", len(logs))
 	if len(logs) > 0 {
-		fmt.Println("First line:")
-		fmt.Println(logs[0])
-		fmt.Println("# Statistics ----------------------------------------")
-		fmt.Println("Status Code Counts:")
+		fmt.Printf("First line: %v\n", logs[0])
+
 		statusCodeStats := statusCodeCounts(logs)
-		for _, v := range statusCodeStats {
-			fmt.Printf("- %d: %d\n", v.Code, v.Count)
+		if len(statusCodeStats) > 0 {
+			fmt.Printf("Most common: HTTP %d (%d times)\n", statusCodeStats[0].Code, statusCodeStats[0].Count)
 		}
 	}
 }
@@ -134,7 +132,7 @@ func logReader(path string) ([]*LogEntry, error) {
 }
 
 // statusCodeCounts returns a slice of StatusCodeCount struct,
-// sorted by Code values.
+// sorted by count.
 func statusCodeCounts(l []*LogEntry) []StatusCodeCount {
 	m := make(map[int]int)
 	for _, entry := range l {
@@ -150,7 +148,7 @@ func statusCodeCounts(l []*LogEntry) []StatusCodeCount {
 	}
 
 	slices.SortFunc(s, func(i, j StatusCodeCount) int {
-		return cmp.Compare(i.Code, j.Code)
+		return cmp.Compare(i.Count, j.Count)
 	})
 
 	return s
